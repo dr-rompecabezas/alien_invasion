@@ -12,21 +12,15 @@ from button import Button
 
 class AlienInvasion:
     """Overall class to manage game assets and behaviour."""
-    
+
     def __init__(self):
         """"Initialize the game and create game resources."""
         pygame.init()
         self.settings = Settings()
 
         # Initialize screen settings
-        if self.settings.fullscreen:
-            self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-            self.settings.screen_width = self.screen.get_rect().width
-            self.settings.screen_height = self.screen.get_rect().height
-        else:
-            self.screen = pygame.display.set_mode(
-                (self.settings.screen_width, self.settings.screen_height))
-        
+        self._initialize_screen_settings()
+
         pygame.display.set_caption('Alien Invasion')
 
         # Create an instance to store game statistics,
@@ -52,9 +46,19 @@ class AlienInvasion:
                 self.ship.update()
                 self._update_bullets()
                 self._update_aliens()
-            
+
             self._update_screen()
- 
+
+    def _initialize_screen_settings(self):
+        """Check for fullscreen settings and initialize screen settings."""
+        if self.settings.fullscreen:
+            self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            self.settings.screen_width = self.screen.get_rect().width
+            self.settings.screen_height = self.screen.get_rect().height
+        else:
+            self.screen = pygame.display.set_mode(
+                (self.settings.screen_width, self.settings.screen_height))
+
     def _check_events(self):
         """Respond to keypresses and mouse events."""
         for event in pygame.event.get():
@@ -91,7 +95,7 @@ class AlienInvasion:
 
             # Hide the mouse cursor.
             pygame.mouse.set_visible(False)
-    
+
     def _check_keydown_events(self, event):
         """Respond to keypresses."""
         if event.key == pygame.K_RIGHT:
@@ -121,8 +125,8 @@ class AlienInvasion:
         """Update position of bullets and get rid of old bullets."""
         # Update bullets positions.
         self.bullets.update()
-        
-        # Get rid of bullets that have dissapeared.
+
+        # Get rid of bullets that have disappeared.
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
@@ -133,7 +137,7 @@ class AlienInvasion:
         """Respond to bullet-alien collisions."""
         # Remove any bullets and aliens that have collided.
         collisions = pygame.sprite.groupcollide(
-                self.bullets, self.aliens, True, True)
+            self.bullets, self.aliens, True, True)
 
         if collisions:
             for aliens in collisions.values():
@@ -142,14 +146,17 @@ class AlienInvasion:
             self.sb.check_high_score()
 
         if not self.aliens:
-            # Destroy existing bullets and create new fleet.
-            self.bullets.empty()
-            self._create_fleet()
-            self.settings.increase_speed()
+            self._start_new_level()
 
-            # Increase level.
-            self.stats.level += 1
-            self.sb.prep_level()
+    def _start_new_level(self):
+        """Destroy existing bullets and create new fleet."""
+        self.bullets.empty()
+        self._create_fleet()
+        self.settings.increase_speed()
+
+        # Increase level.
+        self.stats.level += 1
+        self.sb.prep_level()
 
     def _update_aliens(self):
         """
@@ -207,8 +214,8 @@ class AlienInvasion:
 
         # Determine the number of rows of aliens that fit on the screen.
         ship_height = self.ship.rect.height
-        available_space_y = (self.settings.screen_height - 
-                                (3 * alien_height) - ship_height)
+        available_space_y = (self.settings.screen_height -
+                             (3 * alien_height) - ship_height)
         number_rows = available_space_y // (2 * alien_height)
 
         # Create the full fleet of aliens.
@@ -237,7 +244,6 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             alien.rect.y += self.settings.fleet_drop_speed
         self.settings.fleet_direction *= -1
-
 
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
