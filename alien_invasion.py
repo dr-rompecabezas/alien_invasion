@@ -18,6 +18,7 @@ class AlienInvasion:
         pygame.init()
         self.settings = Settings()
 
+        # Initialize screen settings
         if self.settings.fullscreen:
             self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
             self.settings.screen_width = self.screen.get_rect().width
@@ -58,6 +59,7 @@ class AlienInvasion:
         """Respond to keypresses and mouse events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.stats.save_high_score()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
@@ -99,6 +101,7 @@ class AlienInvasion:
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
         elif event.key == pygame.K_q:
+            self.stats.save_high_score()
             sys.exit()
 
     def _check_keyup_events(self, event):
@@ -234,6 +237,7 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             alien.rect.y += self.settings.fleet_drop_speed
         self.settings.fleet_direction *= -1
+
 
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
