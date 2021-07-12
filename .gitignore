@@ -139,6 +139,3 @@ cython_debug/
 
 # Pycache
 .idea
-
-# Game stats
-stats/highest_score.txt
